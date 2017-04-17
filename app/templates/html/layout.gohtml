@@ -1,0 +1,88 @@
+{{define "layout"}}
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{{block "title" .}} {{end}}</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+  {{block "js" .}} {{end}}
+
+  <style>
+    .x-page-header {
+      position: relative;
+      padding: 30px 0;
+      color: #ffffff;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+      background-color: #167ac6;
+      background-image: linear-gradient(to bottom, #3996dc 0%, #167ac6 100%);
+      background-repeat: repeat-x;
+    }
+    .elided-column {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 1px;
+    }
+    .navbar {
+      margin-bottom: 0;
+      background-color: #282828;
+      border-color: #282828;
+    }
+    .navbar-default .navbar-nav>li>a:hover {
+      color: #fff;
+    }
+  </style>
+
+  {{block "style" .}} {{end}}
+
+</head>
+
+<body>
+  <nav class="navbar navbar-default navbar-static-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Spotlight</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        {{if .SignedIn}}
+          <ul class="nav navbar-nav">
+            <li><a href="/subscriptions">Subscriptions</a>
+          </ul>
+        {{end}}
+        <ul class="nav navbar-nav navbar-right">
+          {{if .SignedIn}}
+            <li><a href="/logout">Sign out</a></li>
+          {{else}}
+            <li><a href="/subscriptions">Sign in</a></li>
+          {{end}}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  {{template "content" .}}
+
+  <div class="container" style="margin-top: 25px">
+    <p>
+      © 2017 <a href="http://alecholmes.com">Alec Holmes</a>. <a href="mailto:spotlight@alecholmes.com">Contact</a>.</p>
+    </p>
+  </div>
+</body>
+
+</html>
+{{end}}

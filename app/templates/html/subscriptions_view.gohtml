@@ -1,0 +1,258 @@
+{{define "title"}}Subscriptions - Spotlight{{end}}
+{{define "style"}}
+  <style>
+    /* Sticky footer styles (http://getbootstrap.com/examples/sticky-footer-navbar/sticky-footer-navbar.css) */
+
+    html {
+      position: relative;
+      min-height: 100%;
+    }
+    body {
+      /* Margin bottom by footer height */
+
+      margin-bottom: 80px;
+    }
+    .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      /* Set the fixed height of the footer here */
+
+      height: 80px;
+      background-color: #f5f5f5;
+    }
+
+    /* Custom page CSS */
+
+    iframe {
+      width: 100%;
+      padding: 0;
+      border: 0;
+      height: 100px;
+    }
+    .new-activity {
+      background-color: #eff8ff;
+    }
+  </style>
+{{end}}
+{{define "js"}}
+  <script>
+    function replaceSpotifyPlayer(playerUrl) {
+      $("#spotifyPlayer")[0].src = playerUrl; // .attr("src", playerUrl)
+    }
+  </script>
+  <script>
+    var emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+
+    /* Create playlist modal */
+
+    $(window).on('load', function() {
+      /* Share modal */
+      $('#shareModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var ownerId = button.data('playlist-owner-id') // Extract info from data-* attributes
+        var playlistId = button.data('playlist-id') // Extract info from data-* attributes
+
+        $('#shareModal').data('playlistOwnerId', button.data('playlist-owner-id') );
+        $('#shareModal').data('playlistId', button.data('playlist-id'));
+
+        $('#recipient-email').closest('.form-group').removeClass('has-error').removeClass('has-success');
+      });
+    
+      $('#shareSubmit').click(function(e){
+        var emailField = $('#recipient-email');
+        var email = emailField.val();
+        var ownerId = $('#shareModal').data('playlistOwnerId');
+        var playlistId = $('#shareModal').data('playlistId');
+
+        if (!emailRegex.test(email)) {
+          emailField.closest('.form-group').removeClass('has-success').addClass('has-error');
+          e.preventDefault();
+          return;
+        } else {
+          emailField.closest('.form-group').removeClass('has-error').addClass('has-success');
+        }
+
+        console.log("Submitting share. ownerId=", ownerId, "playlistId=", playlistId, "email=", email);
+        var body = {
+          playlistOwnerId: "" + ownerId,
+          playlistId: "" + playlistId,
+          email: "" + email,
+        }
+        $.post("/subscriptions/share", JSON.stringify(body))
+          .done(function() {
+            console.log("Share created");
+          })
+          .fail(function(err) {
+            console.log("Error sharing:", err);
+          });
+
+        $('#shareModal').modal('hide');
+      });
+
+      /* Create playlist modal */
+      $('#createPlaylistSubmit').click(function(e){
+        var nameField = $('#playlist-name');
+        var name = nameField.val();
+
+        if (name.length == 0 || name.length > 50) {
+          nameField.closest('.form-group').removeClass('has-success').addClass('has-error');
+          e.preventDefault();
+          return;
+        } else {
+          nameField.closest('.form-group').removeClass('has-error').addClass('has-success');
+        }
+
+        console.log("Creating playlist. name=", name);
+        var body = {
+          playlistName: name,
+        }
+        $.post("/playlists", JSON.stringify(body))
+          .done(function() {
+            console.log("Playlist created");
+          })
+          .fail(function(err) {
+            console.log("Error creating playlist:", err);
+          });
+
+        window.location.href = "/subscriptions";
+      });
+    });
+
+  </script>
+{{end}}
+
+{{define "content"}}
+  <div class="jumbotron x-page-header">
+    <div class="container">
+      <h1>Your Subscriptions</h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <div>
+      <h3>Recent activity</h3>
+      <ul class="list-group">
+
+      {{if not .Activities}}
+        <li class="list-group-item">
+          <p>Your playlists don't have any activity yet.</p>
+          <p>
+            To get started, create a new collaborative playlist or subscribe to one of
+            the existing ones that you created or follow.
+            You'll see activity here once you and other playlist followers adding tracks to
+            your subscribed playlists.
+          </p>
+        </li>
+      {{else}}
+        {{range .Activities}}
+          <li class="list-group-item">
+            <a href="#" style="text-decoration: none" onclick="replaceSpotifyPlayer('{{.EmbedURL}}')">
+              <span class="glyphicon glyphicon glyphicon-play-circle" aria-hidden="true"></span>
+            </a>
+
+            <strong>{{.ActorName}}</strong> {{.Description}}
+                  <strong><a href="{{.TrackURL}}" style="text-decoration: none">{{.TrackName}}</a></strong>
+            to <strong><a href="{{.PlaylistURL}}">{{.PlaylistName}}</a></strong>.
+          </li>
+        {{end}}
+      {{end}}
+      </ul>
+    </div>
+
+    <div>
+      <h3>Collaborative Playlists</h3>
+      <p>You can subscribe to any collaborative playlists you created or follow.</p>
+
+      <ul class="list-group">
+        {{if not .Playlists}}
+          <li class="list-group-item">
+            <p>You don't have any collaborative playlists yet. Create one and share it to get started.</p>
+
+            <p>
+              <a href="https://support.spotify.com/us/using_spotify/playlists/create-playlists-with-your-friends/">This article</a>
+              describes how to use collaborative playlists.
+            </p>
+          </li>
+        {{else}}
+          {{range .Playlists}}
+            <li class="list-group-item">
+              <strong><a href="{{.ExternalURL}}">{{.Name}}</a></strong>
+
+              <span type="button" class="btn btn-default btn-xs" style="float: right; margin-left: 5px;" aria-label="Left Align" style="cursor: pointer;"
+                data-toggle="modal" data-target="#shareModal" data-playlist-owner-id="{{.OwnerID}}" data-playlist-id="{{.ID}}">
+                <span class="glyphicon glyphicon-share" aria-hidden="true"></span> Share
+              </span>
+
+              {{if .SubscriptionToken}}
+                <a type="button" class="btn btn-default btn-xs" style="float: right" aria-label="Left Align" href="/subscriptions/delete?token={{.SubscriptionToken}}">
+                  <span class="glyphicon glyphicon-minus" aria-hidden="true"></span> Unsubscribe
+                </a>
+              {{else}}
+                <a type="button" class="btn btn-default btn-xs" style="float: right" aria-label="Left Align" href="/subscriptions/create?ownerId={{.OwnerID}}&playlistId={{.ID}}">
+                  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Subscribe
+                </a>
+              {{end}}
+
+            </li>
+          {{end}}
+        {{end}}
+      </ul>
+
+      <div>
+        <button type="button" class="btn btn-default" aria-label="Left Align" style="cursor: pointer;"
+            data-toggle="modal" data-target="#createPlaylistModal">
+          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+          Create Collaborative Playlist
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <iframe id="spotifyPlayer" src="https://embed.spotify.com/?uri=spotify:track:1zvsSw4E65NaVGs8awuWui&theme=white" frameborder="0" allowtransparency="true"></iframe>
+    </div>
+  </footer>
+
+  <!-- Modal for sharing playlist via email -->
+  <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="recipient-email" class="control-label">Email:</label>
+              <input type="text" class="form-control" id="recipient-email">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="shareSubmit" type="submit">Share</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for creating a collaborative playlist -->
+  <div class="modal fade" id="createPlaylistModal" tabindex="-1" role="dialog" aria-labelledby="createPlaylistModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="playlist-name" class="control-label">Playlist Name:</label>
+              <input type="text" class="form-control" id="playlist-name">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="createPlaylistSubmit" type="submit">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{{end}}

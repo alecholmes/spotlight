@@ -1,0 +1,35 @@
+{{define "subscription_update_email"}}
+<!doctype html>
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Subscription Updated</title>
+	</head>
+
+	<body>
+		<p style="font-family: 'Helvetica Neue',Helvetica,arial,sans-serif; font-size: 18px; font-weight: bold; line-height: 150%; color: #23527c">
+			{{.ActorsDescription}} made some changes to your collaborative playlist,
+			<a href="{{.Playlist.ExternalURL}}" style="color: inherit;">{{.Playlist.Name}}</a>.
+		</p>
+
+		{{range .Activities}}
+			<p style="font-family: 'Helvetica Neue',Helvetica,arial,sans-serif; font-size: 14px; line-height: 150%">
+				<strong>{{.ActorName}}</strong> {{.Description}} <strong><a href="{{.TrackURL}}" style="color: #23527c">{{.TrackName}}</a></strong>.
+			</p>
+		{{end}}
+
+		<p style="font-family: 'Helvetica Neue',Helvetica,arial,sans-serif; font-size: 14px; line-height: 150%">
+			To see all recent changes for your subscriptions visit <a href="{{.AppBaseURL}}" style="color: #23527c">Spotlight</a> or
+			<a href="{{.Playlist.ExternalURL}}" style="color: #23527c">open this playlist in Spotify</a>.
+		</p>
+
+		<div style="font-family: 'Helvetica Neue',Helvetica,arial,sans-serif; font-size: 12px; line-height: 150%">
+			You received this email because you subscribed to this playlist using
+			<a href="{{.AppBaseURL}}" style="color: #23527c">Spotlight</a>.
+			You can manage your subscriptions <a href="{{.AppBaseURL}}/subscriptions" style="color: #23527c">here</a>.
+		</div>
+	</body>
+</html>
+{{end}}

@@ -1,0 +1,25 @@
+{{define "share_email"}}
+<!doctype html>
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Follow Along!</title>
+	</head>
+
+	<body>
+		<p style="font-family: 'Helvetica Neue',Helvetica,arial,sans-serif; font-size: 14px; line-height: 150%">
+			<strong><a href="mailto:{{.Inviter.Email}}">{{.Inviter.Name}}</a></strong> would like you to follow
+			a collaborative Spotify playlist,
+			<strong><a href="{{.Playlist.ExternalURL}}">{{.Playlist.Name}}</a></strong>, using <a href="{{.AppBaseURL}}">Spotlight</a>.
+		</p>
+
+		<p style="font-family: 'Helvetica Neue',Helvetica,arial,sans-serif; font-size: 14px; line-height: 150%">
+			To subscribe to this playlist and receive email when songs are added,
+			<strong><a href="{{.SubscribeURL}}">click here</a></strong>.
+			You can unsubscribe at any time.
+		</p>
+	</body>
+</html>
+{{end}}

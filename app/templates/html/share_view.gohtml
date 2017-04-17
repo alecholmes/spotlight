@@ -1,0 +1,21 @@
+{{define "title"}}Spotlight{{end}}
+{{define "content"}}
+  <div class="jumbotron x-page-header">
+    <div class="container">
+      <h1>Welcome</h1>
+    </div>
+  </div>
+
+  <div class="container">
+  	<div>
+			<a href="mailto:{{.InviterEmail}}">{{.InviterName}}</a> has invited you to subscribe to
+			playlist {{.PlaylistName}}.
+  	</div>
+
+		<div style="text-align: center; margin-top: 25px; margin-bottom: 25px">
+			<a href="{{.SubscribeURL}}" class="btn btn-success btn-lg">Subscribe Using Your Spotify Account</a>
+		</div>
+  </div>
+
+  </div>
+{{end}}

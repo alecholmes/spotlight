@@ -1,0 +1,16 @@
+# Config
+app/config
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# Artifacts
+spotlight.zip
+
+# Local environment
+.vscode
+
+# Internal docs
+internal-runbook.md
