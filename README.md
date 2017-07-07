@@ -1,6 +1,6 @@
 # Spotlight (BETA)
 
-Spotlight is a webapp to for sharing music using Spotify's collaborative playlists. It is currently running [here](http://spotlight.alecholmes.com/). This repository has the source code along with instructions for running locally. The app can also be easily to deployed as a Docker image, including on AWS Elastic Beanstalk.
+Spotlight is a webapp for sharing music using Spotify's collaborative playlists. It currently runs [here](http://spotlight.alecholmes.com/). This repository has the source code along with instructions for running locally. The app can also be easily to deployed as a Docker image, including on AWS Elastic Beanstalk.
 
 ## Development
 
