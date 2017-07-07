@@ -128,9 +128,18 @@ func (s *SpotifyClient) ListMyPlaylists() ([]*Playlist, error) {
 		return nil, errors.Wrap(err, 0)
 	}
 
-	// TODO: pagination!
+	allPlaylists := wrappedPlaylists.Playlists
+	for next := wrappedPlaylists.Next; len(next) > 0; {
+		playlists := new(listPlaylists)
+		if _, err := s.get(next, nil, false, playlists); err != nil {
+			return nil, err
+		}
 
-	return wrappedPlaylists.Playlists, nil
+		allPlaylists = append(allPlaylists, playlists.Playlists...)
+		next = playlists.Next
+	}
+
+	return allPlaylists, nil
 }
 
 func (s *SpotifyClient) GetPlaylist(userID, playlistID string) (*Playlist, error) {
@@ -142,10 +151,19 @@ func (s *SpotifyClient) GetPlaylist(userID, playlistID string) (*Playlist, error
 		return nil, nil
 	}
 
-	if playlist != nil {
-		// TODO: pagination
-		playlist.PlaylistTracks = playlist.RawTracks.PlaylistTracks
+	// Load all additional pages for paginated results.
+	allTracks := playlist.RawTracks.PlaylistTracks
+	for next := playlist.RawTracks.Next; len(next) > 0; {
+		tracks := new(listPlaylistTracks)
+		if _, err := s.get(next, nil, false, tracks); err != nil {
+			return nil, err
+		}
+
+		allTracks = append(allTracks, tracks.PlaylistTracks...)
+		next = tracks.Next
 	}
+
+	playlist.PlaylistTracks = allTracks
 
 	return playlist, nil
 }
@@ -178,10 +196,14 @@ func (s *SpotifyClient) FollowPlaylist(ownerID, playlistID string, public bool) 
 	return resp, nil
 }
 
+// path may be either a relative ("/foo/bar") or absoluate ("http://example.com/foo/bar").
+// If path is relative then it will be prefixed with spotifyAPIURL.
 func (s *SpotifyClient) newRequest(method, path string, queryParams map[string]string, reqBody interface{}) (*http.Request, error) {
-	u, err := url.Parse(fmt.Sprintf("%s%s", spotifyAPIURL, path))
+	u, err := url.Parse(path)
 	if err != nil {
 		return nil, errors.Wrap(err, 0)
+	} else if len(u.Scheme) == 0 {
+		return s.newRequest(method, fmt.Sprintf("%s%s", spotifyAPIURL, path), queryParams, reqBody)
 	}
 
 	for k, v := range queryParams {
